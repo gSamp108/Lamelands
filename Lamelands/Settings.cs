@@ -15,5 +15,12 @@ namespace Lamelands
             public int ProgressRequirementCurve { get; } = 100;
         }
         public CitySettings City { get; } = new CitySettings();
+
+        public sealed class WorldGenerationSettings
+        {
+            public int CitySpawnChance = 5;
+        }
+        public WorldGenerationSettings WorldGeneration { get; } = new WorldGenerationSettings();
+
     }
 }

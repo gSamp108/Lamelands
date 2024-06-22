@@ -31,12 +31,16 @@ namespace Lamelands
             while (openSpawnTiles.Count>0)
             {
                 var selectedTile = openSpawnTiles.Random();
+                openSpawnTiles.Remove(selectedTile);
                 foreach(var nearbyTile in selectedTile.NearbyRange(2))
                 {
                     openSpawnTiles.Remove(nearbyTile);
                 }
-                var empire = new Empire(this);
-                var city = new City(this, selectedTile, empire);
+                if (this.Rng.Next(this.Settings.WorldGeneration.CitySpawnChance) == 0)
+                {
+                    var empire = new Empire(this);
+                    var city = new City(this, selectedTile, empire);
+                }
             }
         }
 
