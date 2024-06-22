@@ -14,6 +14,7 @@ namespace Lamelands
         public HashSet<Empire> Empires { get; } = new HashSet<Empire>();
         public HashSet<City> Cities { get; } = new HashSet<City>();
         public Settings Settings { get; } = new Settings();
+        public HashSet<Forces> Forces { get; } = new HashSet<Forces>();
 
         public World(int width, int height)
         {

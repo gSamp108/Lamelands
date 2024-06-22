@@ -14,7 +14,8 @@ namespace Lamelands
 
         public Position Position { get; private set; }
         public City City { get; set; }
-        public City ClaimedByCity { get; set; }
+        public City ClaimingCity { get; set; }
+        public HashSet<Forces> Forces { get; } = new HashSet<Forces>();
 
         public Tile(World world, Position position)
         {

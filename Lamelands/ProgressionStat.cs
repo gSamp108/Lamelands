@@ -8,7 +8,7 @@ namespace Lamelands
 {
     public sealed class ProgressionStat
     {
-        public int Level { get; set; }
+        public int Level { get; private set; }
         public int Progress { get; private set; }
         public int ProgressCurve { get; private set; }
         public bool RequirementIgnoresLevel { get; private set; }
@@ -16,9 +16,15 @@ namespace Lamelands
 
         public ProgressionStat(int progressCurve, bool requirementIgnoresLevel = false)
         {
-            this.Level = 1;
             this.ProgressCurve = progressCurve;
             this.RequirementIgnoresLevel = requirementIgnoresLevel;
+        }
+
+        public void ChangeLevel(int amount)
+        {
+            this.Level += amount;
+            if (this.Level < 0) this.Level = 0;
+            this.ChangeProgress(0);
         }
 
         public void ChangeProgress(int amount)
@@ -31,7 +37,7 @@ namespace Lamelands
             }
             while (this.Progress < 0)
             {
-                if (this.Level == 1) this.Progress = 0;
+                if (this.Level == 0) this.Progress = 0;
                 else
                 {
                     this.Level -= 1;

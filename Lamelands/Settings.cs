@@ -12,7 +12,9 @@ namespace Lamelands
         {
             public int TickTime { get; } = 100;
             public int TickTimeVariance { get; } = 50;
-            public int ProgressRequirementCurve { get; } = 100;
+            public int ReservesRequirementCurve { get; } = 100;
+            public int LeadershipRequirementCurve { get; } = 100;
+            public int WealthRequirementCurve { get; } = 100;
         }
         public CitySettings City { get; } = new CitySettings();
 

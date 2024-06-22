@@ -8,6 +8,8 @@ namespace Lamelands
 {
     public struct Position
     {
+        public static readonly Position Zero = new Position();
+
         public int X { get; private set; }
         public int Y { get; private set; }
 

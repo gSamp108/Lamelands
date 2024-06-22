@@ -12,6 +12,7 @@ namespace Lamelands
         public Random Rng => this.World.Rng;
         public HashSet<City> Cities { get; } = new HashSet<City>();
         public Settings Settings => this.World.Settings;
+        public HashSet<Forces> Forces = new HashSet<Forces>();
 
         public Empire(World world)
         {

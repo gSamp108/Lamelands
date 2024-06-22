@@ -8,7 +8,7 @@ namespace Lamelands
 {
     public sealed class City
     {
-        public enum TickActions { Idle, BuildReserves, BuildLeadership }
+        public enum TickActions { Idle, BuildReserves, BuildLeadership, BuildWealth, TrainUnit, DeployForces, ReinforceForces }
         public static readonly List<TickActions> PossibleTickActions = Enum.GetValues(typeof(TickActions)).Cast<TickActions>().ToList();
 
         public World World { get; private set; }
@@ -17,8 +17,12 @@ namespace Lamelands
         public int TickTimer { get; private set; }
         public Settings Settings => this.World.Settings;
 
+        public int Units { get; private set; }
         public ProgressionStat Reserves { get; private set; }
         public ProgressionStat Leadership { get; private set; }
+        public ProgressionStat Wealth { get; private set; }
+        public CityInfluenceGrid InfluenceGrid { get; private set; }
+        public HashSet<Forces> Forces { get; } = new HashSet<Forces>();
 
         private Tile tile;
         public Tile Tile
@@ -52,8 +56,10 @@ namespace Lamelands
             this.Empire = empire;
             this.World.Cities.Add(this);
             this.TickTimer = this.TickTimerReset;
-            this.Reserves = new ProgressionStat(this.Settings.City.ProgressRequirementCurve, true);
-            this.Leadership = new ProgressionStat(this.Settings.City.ProgressRequirementCurve);
+            this.Reserves = new ProgressionStat(this.Settings.City.ReservesRequirementCurve, true);
+            this.Leadership = new ProgressionStat(this.Settings.City.LeadershipRequirementCurve);
+            this.Wealth = new ProgressionStat(this.Settings.City.WealthRequirementCurve);
+            this.InfluenceGrid = new CityInfluenceGrid(this);
         }
 
         public void Tick()
@@ -78,6 +84,26 @@ namespace Lamelands
                     case TickActions.BuildLeadership:
                         {
                             this.Leadership.ChangeProgress(1);
+                            break;
+                        }
+                    case TickActions.BuildWealth:
+                        {
+                            this.Wealth.ChangeProgress(1);
+                            break;
+                        }
+                    case TickActions.TrainUnit:
+                        {
+                            if (this.Reserves.Level > 0 && this.Wealth.Level > 0)
+                            {
+                                this.Reserves.ChangeLevel(-1);
+                                this.Wealth.ChangeLevel(-1);
+                                this.Units += 1;
+                            }
+                            break;
+                        }
+                    case TickActions.DeployForces:
+                        {
+                            
                             break;
                         }
                 }

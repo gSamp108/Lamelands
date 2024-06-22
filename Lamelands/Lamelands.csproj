@@ -46,8 +46,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="City.cs" />
+    <Compile Include="Forces.cs" />
     <Compile Include="Empire.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="CityInfluenceGrid.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
