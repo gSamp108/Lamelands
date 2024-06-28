@@ -8,9 +8,6 @@ namespace Lamelands
 {
     public sealed class City
     {
-        public enum TickActions { Idle, BuildReserves, BuildLeadership, BuildWealth, TrainUnit, DeployForces, ReinforceForces }
-        public static readonly List<TickActions> PossibleTickActions = Enum.GetValues(typeof(TickActions)).Cast<TickActions>().ToList();
-
         public World World { get; private set; }
         public Random Rng => this.World.Rng;
         public Position Position => this.Tile.Position;
@@ -60,38 +57,42 @@ namespace Lamelands
             this.Leadership = new ProgressionStat(this.Settings.City.LeadershipRequirementCurve);
             this.Wealth = new ProgressionStat(this.Settings.City.WealthRequirementCurve);
             this.InfluenceGrid = new CityInfluenceGrid(this);
+            this.Tile.ClaimingCity = this;
         }
 
-        public void Tick()
+        public void Tick(TickLog log)
         {
             this.TickTimer -= 1;
             if (this.TickTimer < 1)
             {
                 this.TickTimer = this.TickTimerReset;
 
-                var action = City.PossibleTickActions.Random();
+                var action = this.Settings.City.TickActionSelector.Select(this.Rng);
                 switch (action)
                 {
-                    case TickActions.Idle:
+                    case Settings.CitySettings.TickActions.Idle:
                         {
                             break;
                         }
-                    case TickActions.BuildReserves:
+                    case Settings.CitySettings.TickActions.BuildReserves:
                         {
                             this.Reserves.ChangeProgress(1);
+                            log.Entires.Add(new TickLog.TickLogEntry() { Type = TickLog.TickLogEntryTypes.Build, FromTile = this.Tile });
                             break;
                         }
-                    case TickActions.BuildLeadership:
+                    case Settings.CitySettings.TickActions.BuildLeadership:
                         {
                             this.Leadership.ChangeProgress(1);
+                            log.Entires.Add(new TickLog.TickLogEntry() { Type = TickLog.TickLogEntryTypes.Build, FromTile = this.Tile });
                             break;
                         }
-                    case TickActions.BuildWealth:
+                    case Settings.CitySettings.TickActions.BuildWealth:
                         {
                             this.Wealth.ChangeProgress(1);
+                            log.Entires.Add(new TickLog.TickLogEntry() { Type = TickLog.TickLogEntryTypes.Build, FromTile = this.Tile });
                             break;
                         }
-                    case TickActions.TrainUnit:
+                    case Settings.CitySettings.TickActions.TrainUnit:
                         {
                             if (this.Reserves.Level > 0 && this.Wealth.Level > 0)
                             {
@@ -99,11 +100,52 @@ namespace Lamelands
                                 this.Wealth.ChangeLevel(-1);
                                 this.Units += 1;
                             }
+                            log.Entires.Add(new TickLog.TickLogEntry() { Type = TickLog.TickLogEntryTypes.Build, FromTile = this.Tile });
                             break;
                         }
-                    case TickActions.DeployForces:
+                    case Settings.CitySettings.TickActions.DeployForces:
                         {
-                            
+                            var unitsToDeploy = this.Rng.Next(this.Units + 1);
+                            var reservesToDeploy = this.Rng.Next(this.Reserves.Level + 1);
+                            var totalDeployment = unitsToDeploy+reservesToDeploy;
+                            if (totalDeployment > 0)
+                            {
+                                var deploymentTile = this.Tile;
+                                if (this.Rng.Next(this.Settings.City.DeployOutsideClaimChance) > 0) deploymentTile = this.InfluenceGrid.RandomKnownTile();
+                                else deploymentTile = this.InfluenceGrid.RandomClaimedTile();
+                                if (deploymentTile!= null)
+                                {
+                                    var force = new Forces(this.World, deploymentTile, this.empire, this);
+                                    force.Units = unitsToDeploy;
+                                    force.Reserves= reservesToDeploy;
+                                    this.Units -= unitsToDeploy;
+                                    this.Reserves.ChangeLevel(-reservesToDeploy);
+                                    log.Entires.Add(new TickLog.TickLogEntry() { Type = TickLog.TickLogEntryTypes.Move, FromTile = this.Tile, ToTile = deploymentTile });
+                                }
+                            }
+                            break;
+                        }
+                    case Settings.CitySettings.TickActions.ReinforceForces:
+                        {
+                            var unitsToDeploy = this.Rng.Next(this.Units + 1);
+                            var reservesToDeploy = this.Rng.Next(this.Reserves.Level + 1);
+                            var totalDeployment = unitsToDeploy + reservesToDeploy;
+                            if (totalDeployment > 0)
+                            {
+                                var selectedForce = this.Forces.ToList().Random();
+                                if (selectedForce != null)
+                                {
+                                    selectedForce.Units += unitsToDeploy;
+                                    selectedForce.Reserves += reservesToDeploy;
+                                    this.Units -= unitsToDeploy;
+                                    this.Reserves.ChangeLevel(-reservesToDeploy);
+                                    log.Entires.Add(new TickLog.TickLogEntry() { Type = TickLog.TickLogEntryTypes.Move, FromTile = this.Tile, ToTile = selectedForce.Tile });
+                                }
+                            }
+                            break;
+                        }
+                    case Settings.CitySettings.TickActions.ExpandClaim:
+                        {
                             break;
                         }
                 }

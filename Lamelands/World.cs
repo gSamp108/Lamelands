@@ -45,13 +45,28 @@ namespace Lamelands
             }
         }
 
-        public void Tick()
+        public TickLog Tick()
         {
+            var log = new TickLog();
             var currentCities = this.Cities.ToList();
             foreach(var city in currentCities)
             {
-                city.Tick();
+                city.Tick(log);
             }
+
+            var activeForceTiles = this.Tiles.Where(o => o.Forces.Count > 0).ToList();
+            foreach (var tile in activeForceTiles)
+            {
+                var empires = tile.Forces.Select(o => o.Empire).Distinct().Count();
+                if (empires > 1) this.TileCombatTick(tile);
+            }
+
+            return log;
+        }
+
+        private void TileCombatTick(Tile tile)
+        {
+            
         }
 
         public Tile GetTile(Position position)

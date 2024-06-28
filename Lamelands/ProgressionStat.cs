@@ -45,5 +45,10 @@ namespace Lamelands
                 }
             }
         }
+
+        public override string ToString()
+        {
+            return this.Level.ToString() + " (" + this.Progress + "/" + this.ProgressRequirement + ")";
+        }
     }
 }

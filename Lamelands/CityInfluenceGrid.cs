@@ -25,6 +25,7 @@ namespace Lamelands
 
         public City City { get; private set; }
         public World World => this.City.World;
+        public Random Rng => this.World.Rng;
 
         public CityInfluenceTile SourceTile { get; private set; }
         public Dictionary<Tile, CityInfluenceTile> ClaimedTiles { get; } = new Dictionary<Tile, CityInfluenceTile>();
@@ -58,6 +59,18 @@ namespace Lamelands
                     this.KnownTiles.Add(adjacent, new CityInfluenceTile(this, adjacent, iTile));
                 }
             }
+        }
+
+        public Tile RandomKnownTile()
+        {
+            if (this.KnownTiles.Count == 0) return null;
+           return this.KnownTiles.Keys.ToList().Random();
+        }
+
+        public Tile RandomClaimedTile()
+        {
+            if (this.ClaimedTiles.Count == 0) return null;
+            return this.ClaimedTiles.Keys.ToList().Random();
         }
     }
 }
